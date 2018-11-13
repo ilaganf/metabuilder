@@ -1,0 +1,23 @@
+notes.txt
+
+Goal: automated agent for determining optimal neural network architecture for some simple task
+
+Task must be simple and easy to train, to minimize time spent training the constructed network
+
+Possible tasks:
+- simple image classification (CIFAR-10)
+- simple non-linear regression task
+- simple anomaly detection task
+
+RL formulation:
+ State: particular network configuration
+    - Limit amount of dense layers to speed computation
+    - End state if output layer is present
+
+ Action: add layer, change layer size/parameters, create output layer (can be used to deterministically transition to an end state)
+
+ Reward: function of accuracy and network size
+    - Can play with this: may want to incentivize agent to build small but powerful networks
+    - Can also put a hard cap on number of layers allowed (assign huge negative reward if parameter number goes above certain amount)
+
+ Transition: deterministic, following from action
