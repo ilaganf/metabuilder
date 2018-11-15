@@ -3,9 +3,13 @@ main.py
 
 Runs the training of the agent
 '''
+from Agent import QAgent
 
 def main():
-    pass
+    agent = QAgent(gamma=.99, lr=.95, action_file='actions.json', exploreProb=.2, 'history.txt')
+
+    for _ in range(5):
+        agent.learn()
     # conv (C): filters, kernel_size, strides, padding='SAME', activation=tf.nn.relu
 
     # batchnorm (B)

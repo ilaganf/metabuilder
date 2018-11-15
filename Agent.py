@@ -128,7 +128,8 @@ class QAgent:
 
         factor = self.lr * (q_opt - (reward + self.discount * v_opt))
         self.weights -= factor * self.weights
-        
+
 
     def learn(self):
-        pass
+        self.state = []
+        self.explore()
