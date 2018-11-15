@@ -1,12 +1,12 @@
 import json
 
 actions = {}
-actions['C'] = {}
-actions['C']['filters'] = [1, 8, 16, 32, 64]
-actions['C']['kernel_size'] = [3, 5, 7]
-actions['C']['strides'] = [1, 2, 3]
-actions['C']['padding'] = ['SAME']
-actions['C']['activation'] = ['relu']
+actions['c'] = {}
+actions['c']['filters'] = [1, 8, 16, 32, 64]
+actions['c']['kernel_size'] = [3, 5, 7]
+actions['c']['strides'] = [1, 2, 3]
+actions['c']['padding'] = ['SAME']
+actions['c']['activation'] = ['relu']
 
 actions['B'] = []
 actions['mp'] = {}
@@ -19,7 +19,13 @@ actions['ap']['pool_size'] = [2, 5, 7]
 actions['ap']['strides'] = [1, 2, 3]
 actions['ap']['padding'] = ['SAME']
 
-actions['D'] = []
+actions['d'] = {}
+actions['d']['units'] = [25, 50, 75, 100]
+
+actions['o'] = {}
+actions['o']['units'] = [10]
+
+actions['f'] = []
 
 with open('actions.json', 'w') as outfile:
     json.dump(actions, outfile)
