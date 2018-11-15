@@ -52,7 +52,6 @@ def model_init(layers):
     hidden_size = 200
     reg = 0.001
     num_classes = 10
-
     #layers = [
     #    tf.layers.Conv2D(input_shape=input_shape, filters=channel_1, kernel_size=(5,5), strides=3, padding="same", activation=tf.nn.relu, kernel_initializer=initializer, kernel_regularizer=tf.contrib.layers.l2_regularizer(reg)),
     #    tf.layers.BatchNormalization(),
@@ -60,15 +59,14 @@ def model_init(layers):
     #    tf.layers.Conv2D(filters=channel_2, kernel_size=(5,5), strides=1, padding="same", activation=tf.nn.relu, kernel_initializer=initializer, kernel_regularizer=tf.contrib.layers.l2_regularizer(reg)),
     #    tf.layers.BatchNormalization(),
     #    tf.layers.MaxPooling2D(pool_size=pool_size_2, strides=2, padding="SAME"),
-        #tf.layers.Conv2D(filters=channel_3, kernel_size=(3,3), strides=1, padding="same", activation=tf.nn.relu, kernel_initializer=initializer, kernel_regularizer=tf.contrib.layers.l2_regularizer(reg)),
-        #tf.layers.MaxPooling2D(pool_size=pool_size_2, strides=1),
-        #tf.layers.BatchNormalization(),
+    #    tf.layers.Conv2D(filters=channel_3, kernel_size=(3,3), strides=1, padding="same", activation=tf.nn.relu, kernel_initializer=initializer, kernel_regularizer=tf.contrib.layers.l2_regularizer(reg)),
+    #    tf.layers.MaxPooling2D(pool_size=pool_size_2, strides=1),
+    #    tf.layers.BatchNormalization(),
     #    tf.layers.Flatten(),
     #    tf.layers.Dense(384, kernel_initializer=initializer, kernel_regularizer=tf.contrib.layers.l2_regularizer(reg), activation=tf.nn.relu),
     #    tf.layers.Dense(192, kernel_initializer=initializer, kernel_regularizer=tf.contrib.layers.l2_regularizer(reg), activation=tf.nn.relu),
     #    tf.layers.Dense(num_classes, kernel_initializer=initializer, kernel_regularizer=tf.contrib.layers.l2_regularizer(reg), activation=tf.nn.softmax)
     #]
-
     model = tf.keras.Sequential(layers)
     return model
 
@@ -91,16 +89,36 @@ def create_layers(actions):
             layers += [tf.layers.Flatten()]
         if action == 'd':
             layers += [tf.layers.Dense(**value)]
+        if action == 'o':
+            layers += [tf.layers.Dense(**value)]
     return layers
 
 def optimizer_init_fn():
     return tf.train.AdamOptimizer()
 
-def main():
+def eval_action(actions):
     X_train, y_train, X_val, y_val, X_test, y_test = load_cifar10()
     device = '/gpu:0'
     print_every = 700
-    num_epochs = 10
+    num_epochs = 1
+
+    layers = create_layers(actions)
+    model=model_init(layers)
+
+    learning_rate = 0.001
+
+    model.compile(optimizer=tf.train.AdamOptimizer(learning_rate),
+                  loss='categorical_crossentropy',
+                  metrics=['accuracy'])
+    history = model.fit(x=X_train,
+              y=to_categorical(y_train, num_classes=10),
+              batch_size=None,
+              epochs=num_epochs,
+              verbose=1,
+              validation_data=(X_val, to_categorical(y_val, num_classes=10)))
+    return history.history['val_acc'][-1]
+
+if __name__=='__main__':
     actions =   [('c', {'filters':64, 'kernel_size':(5,5), 'strides':3, 'padding':'SAME'}),
                  ('b', {}),
                  ('mp', {'pool_size':(3,3), 'strides':2, 'padding':'SAME'}),
@@ -108,19 +126,4 @@ def main():
                  ('mp', {'pool_size':(3,3), 'strides':2, 'padding':'SAME'}),
                  ('f', {}),
                  ('d', {'units':10})]
-    layers = create_layers(actions)
-    model=model_init(layers)
-
-    learning_rate = 0.001
-    model.compile(optimizer=tf.train.AdamOptimizer(learning_rate),
-                  loss='categorical_crossentropy',
-                  metrics=['accuracy'])
-    model.fit(x=X_train,
-              y=to_categorical(y_train, num_classes=10),
-              batch_size=None,
-              epochs=num_epochs,
-              verbose=1,
-              validation_data=(X_val, to_categorical(y_val, num_classes=10)))
-
-if __name__=='__main__':
-    main()
+    print(eval_action(actions))
