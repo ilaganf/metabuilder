@@ -2,7 +2,6 @@ import json
 import itertools
 
 def get_actions(action_file):
-
     with open(action_file) as data_file:
         actions = json.load(data_file)
 

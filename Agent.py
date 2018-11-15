@@ -7,6 +7,7 @@ import random
 from collections import namedtuple, defaultdict
 
 import neural
+import numpy as np
 from read_actions import get_actions
 
 
@@ -21,12 +22,12 @@ class QAgent:
         self._set_actions(action_file)
         self.numIters = 0
         self.exploreProb = exploreProb
-        self.weights = np.ones(10)
+        self.weights = np.zeros(10)
         self.log = logFile
 
 
     def _set_actions(self, file):
-        self.actions = [Action(act) for act in get_actions(file)]
+        self.actions = [Action(*act) for act in get_actions(file)]
 
 
     def _successors(self):
@@ -72,9 +73,10 @@ class QAgent:
     def get_action(self):
         self.numIters += 1
         if random.random() < self.exploreProb:
-            return random.choice(self._successors)
+            return random.choice(self._successors())
         else:
-            return max((self.calcQ(act), act) for act in self._successors)
+            print([x[0] for x in [(self.calcQ(act),act) for act in self._successors()]])
+            return max([(self.calcQ(act),act) for act in self._successors()], key=lambda x:x[0])[1]
 
 
     def featurize(self, sprime):
@@ -85,13 +87,13 @@ class QAgent:
         for layer in sprime:
             if layer.name == 'c':
                 features[0] += 1
-                features[1] += layer.args['filters'] * layer.args['kernel_size'][0]**2
+                features[1] += layer.args['filters'] * layer.args['kernel_size']**2
             if layer.name == 'mp':
                 features[2] += 1
-                features[3] += layer.args['pool_size'][0]**2
+                features[3] += layer.args['pool_size']**2
             if layer.name == 'ap':
                 features[4] += 1
-                features[5] += layer.args['pool_size'][0]**2
+                features[5] += layer.args['pool_size']**2
             if layer.name == 'd':
                 features[6] += 1
                 features[7] += layer.args['units']
@@ -123,10 +125,10 @@ class QAgent:
 
     def update(self, action):
         if self._check_end_state(): return
-        v_opt = max(self.calcQ(act) for act in self._successors)
+        v_opt = max(self.calcQ(act) for act in self._successors())
         q_opt = self.calcQ(action)
-
-        factor = self.lr * (q_opt - (reward + self.discount * v_opt))
+        factor = self.lr * (q_opt - (self.get_reward() + self.discount * v_opt))
+        print(factor)
         self.weights -= factor * self.weights
 
 

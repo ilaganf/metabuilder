@@ -78,12 +78,15 @@ def create_layers(actions):
             value['input_shape'] = input_shape
             layers += [tf.layers.Conv2D(**value)]
         if action == 'c':
+            value['kernel_size'] = (value['kernel_size'],value['kernel_size'])
             layers += [tf.layers.Conv2D(**value)]
         if action == 'b':
             layers += [tf.layers.BatchNormalization()]
         if action == 'mp':
+            value['pool_size'] = (value['pool_size'],value['pool_size'])
             layers += [tf.layers.MaxPooling2D(**value)]
         if action == 'ap':
+            value['pool_size'] = (value['pool_size'],value['pool_size'])
             layers += [tf.layers.AveragePooling2D(**value)]
         if action == 'f':
             layers += [tf.layers.Flatten()]
@@ -119,11 +122,11 @@ def eval_action(actions):
     return history.history['val_acc'][-1]
 
 if __name__=='__main__':
-    actions =   [('c', {'filters':64, 'kernel_size':(5,5), 'strides':3, 'padding':'SAME'}),
+    actions =   [('c', {'filters':64, 'kernel_size':5, 'strides':3, 'padding':'SAME'}),
                  ('b', {}),
-                 ('mp', {'pool_size':(3,3), 'strides':2, 'padding':'SAME'}),
-                 ('c', {'filters':32, 'kernel_size':(5,5), 'strides':33, 'padding':'SAME'}),
-                 ('mp', {'pool_size':(3,3), 'strides':2, 'padding':'SAME'}),
+                 ('mp', {'pool_size':3, 'strides':2, 'padding':'SAME'}),
+                 ('c', {'filters':32, 'kernel_size':5, 'strides':33, 'padding':'SAME'}),
+                 ('mp', {'pool_size':3, 'strides':2, 'padding':'SAME'}),
                  ('f', {}),
-                 ('d', {'units':10})]
+                 ('o', {'units':10})]
     print(eval_action(actions))

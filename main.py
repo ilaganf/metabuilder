@@ -6,7 +6,8 @@ Runs the training of the agent
 from Agent import QAgent
 
 def main():
-    agent = QAgent(gamma=.99, lr=.95, action_file='actions.json', exploreProb=.2, 'history.txt')
+    agent = QAgent(gamma=1, lr=.95,
+                   action_file='actions.json', exploreProb=.2, logFile='history.txt')
 
     for _ in range(5):
         agent.learn()
