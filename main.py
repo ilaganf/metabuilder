@@ -7,7 +7,7 @@ from Agent import QAgent
 
 def main():
     agent = QAgent(gamma=1, lr=.95,
-                   action_file='actions.json', exploreProb=.2, logFile='history.txt')
+                   action_file='actions.json', exploreProb=.5, logFile='history.txt')
 
     for _ in range(5):
         agent.learn()

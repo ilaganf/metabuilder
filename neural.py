@@ -100,6 +100,7 @@ def optimizer_init_fn():
     return tf.train.AdamOptimizer()
 
 def eval_action(actions):
+    print(actions)
     X_train, y_train, X_val, y_val, X_test, y_test = load_cifar10()
     device = '/gpu:0'
     print_every = 700
