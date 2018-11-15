@@ -1,9 +1,9 @@
 import json
 import itertools
 
-def get_actions():
+def get_actions(action_file):
 
-    with open('actions.json') as data_file:
+    with open(action_file) as data_file:
         actions = json.load(data_file)
 
     all_actions = []

@@ -3,6 +3,12 @@ Agent.py
 
 Defines the Q-learning agent
 '''
+from collections import namedtuple
+
+from read_actions import get_actions
+
+
+Action = namedtuple('Action', ['name', 'args'])
 
 class QAgent:
 
@@ -15,8 +21,7 @@ class QAgent:
 
 
     def _set_actions(self, file):
-        self.actions = None
-        pass
+        self.actions = [Action(act) for act in get_actions(file)]
 
 
     def _successors(self):
@@ -27,11 +32,7 @@ class QAgent:
         for action in self.actions:
             if self._consider_act(action):
                 succ_layers.append(action)
-            if prev_layer and prev_layer[-1][0] == 'd':
-                if action[0] == 'd':
-                    succ_layers.append(action)
-            else:
-                succ_layers.append(action)
+
         return succ_layers
 
 
@@ -44,16 +45,19 @@ class QAgent:
             return True
 
         # Max 2 pooling layers in a row
-        if action[0] in ['ap','mp']:
-            pass
+        if action.name in ['ap','mp']:
+            return len(self.state) <= 1 or self.state[-2].name not in ['ap','mp']
 
         # Only dense layers after flatten
-        if action[0] == 'f':
-            pass
+        if action.name == 'f' or action.name == 'd':
+            return self.state[-1].name in ['f','d']
 
         # No sequential batchnorm layers
-        if action[0] == 'b':
-            pass
+        if action.name == 'b':
+            if len(self.state) > 1 and self.state[-1].name == 'b':
+                return False
+
+        return True
 
     def _check_end_state(self):
         return self.state and self.state[-1] == self.end
