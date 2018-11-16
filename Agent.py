@@ -72,6 +72,11 @@ class QAgent:
 
     def get_action(self):
         self.numIters += 1
+        if len(self.state) == 10:
+            return Action(name='f', args={})
+        if len(self.state) == 11:
+            return Action(name='o', args={'units':10})
+            
         if random.random() < self.exploreProb:
             return random.choice(self._successors())
         else:
