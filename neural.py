@@ -5,6 +5,7 @@ import math
 import timeit
 import matplotlib.pyplot as plt
 from keras.utils.np_utils import to_categorical
+from copy import deepcopy
 
 def load_cifar10(num_training=49000, num_validation=1000, num_test=10000):
     """
@@ -100,7 +101,7 @@ def optimizer_init_fn():
     return tf.train.AdamOptimizer()
 
 def eval_action(actions):
-    print(actions)
+    actions = deepcopy(actions)
     X_train, y_train, X_val, y_val, X_test, y_test = load_cifar10()
     device = '/gpu:0'
     print_every = 700
@@ -126,7 +127,7 @@ if __name__=='__main__':
     actions =   [('c', {'filters':64, 'kernel_size':5, 'strides':3, 'padding':'SAME'}),
                  ('b', {}),
                  ('mp', {'pool_size':3, 'strides':2, 'padding':'SAME'}),
-                 ('c', {'filters':32, 'kernel_size':5, 'strides':33, 'padding':'SAME'}),
+                 ('c', {'filters':32, 'kernel_size':5, 'strides':3, 'padding':'SAME'}),
                  ('mp', {'pool_size':3, 'strides':2, 'padding':'SAME'}),
                  ('f', {}),
                  ('o', {'units':10})]

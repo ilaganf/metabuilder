@@ -7,9 +7,9 @@ from Agent import QAgent
 
 def main():
     agent = QAgent(gamma=1, lr=.95,
-                   action_file='actions.json', exploreProb=.5, logFile='history.txt')
+                   action_file='actions.json', exploreProb=.01, logFile='history.txt')
 
-    for _ in range(5):
+    for _ in range(100):
         agent.learn()
     # conv (C): filters, kernel_size, strides, padding='SAME', activation=tf.nn.relu
 
