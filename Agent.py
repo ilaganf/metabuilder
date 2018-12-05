@@ -43,6 +43,8 @@ class QAgent:
         (Like why on earth would you do two batchnorms in a row?)
         '''
         prev_layer = None if not self.state else self.state[-1]
+
+        # Start with a convolution
         if not prev_layer:
             return action.name == 'c'
 
@@ -72,6 +74,9 @@ class QAgent:
 
 
     def get_action(self):
+        '''
+        Search action using epsilon greedy approach
+        '''
         self.numIters += 1
         if len(self.state) == 10:
             return Action(name='f', args={})
@@ -87,7 +92,9 @@ class QAgent:
 
     def featurize(self, sprime):
         '''
-        Override me for different problems
+        Takes the given state sprime and featurizes it by counting
+        how many of each layer type there are and by counting the number
+        of parameters (may need more sophisticated features)
         '''
         features = np.zeros(10)
         for layer in sprime:
@@ -114,31 +121,22 @@ class QAgent:
         return np.dot(features, self.weights)
 
 
-    def explore(self):
-        while True:
-            action = self.get_action()
-            reward = self.update(action)
-            self.state.append(action)
-            if self._check_end_state(): break
-        print(self.weights)
-        history = (self.state, reward)
-        self.record(history)
-        return(reward)
-
     def record(self, history):
+        '''
+        Log a network architecture compiled by the agent
+        '''
         with open(self.log, 'a') as file:
             file.write(str(history))
             file.write('\n')
 
 
     def update(self, action):
-        #if self._check_end_state():
-        #    q_opt = self.calcQ(action)
-        #    reward = self.get_reward()
-        #    factor = self.lr * (q_opt - reward)
-        #    self.weights += factor * self.featurize(self.state)
-        #    print(factor, self.weights, reward)
-        #    return reward
+        '''
+        Use Bellman to update the weights of the model given an action 
+
+        state is stored as part of the object and transitions are 
+        deterministic, so only need action to calculate
+        '''
 
         v_opt = max(self.calcQ(act) for act in self._successors())
         q_opt = self.calcQ(action)
@@ -147,6 +145,15 @@ class QAgent:
         self.weights -= factor * self.featurize(self.state + [action])
         return r
 
+
     def learn(self):
         self.state = []
-        return self.explore()
+        while True:
+            action = self.get_action()
+            reward = self.update(action)
+            self.state.append(action)
+            if self._check_end_state(): break
+        print(self.weights)
+        history = (self.state, reward)
+        self.record(history)
+        return reward
