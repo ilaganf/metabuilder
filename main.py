@@ -4,13 +4,19 @@ main.py
 Runs the training of the agent
 '''
 from Agent import QAgent
+import matplotlib.pyplot as plt
 
 def main():
     agent = QAgent(gamma=1, lr=.95,
-                   action_file='actions.json', exploreProb=.01, logFile='history.txt')
+                   action_file='actions.json', exploreProb=.1, logFile='history.txt')
+    x, y = [], []
+    for i in range(30):
+        x.append(i)
+        y.append(agent.learn())
 
-    for _ in range(100):
-        agent.learn()
+    plt.figure()
+    plt.plot(x, y)
+    plt.savefig("ok.png")
     # conv (C): filters, kernel_size, strides, padding='SAME', activation=tf.nn.relu
 
     # batchnorm (B)

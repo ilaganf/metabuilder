@@ -105,7 +105,7 @@ class QAgent:
                 features[7] += layer.args['units']
             features[8] += layer.name == 'f'
             features[9] += layer.name == 'b'
-        features /= np.linalg.norm(features)
+        #features /= np.linalg.norm(features)
         return features
 
 
@@ -123,7 +123,7 @@ class QAgent:
         print(self.weights)
         history = (self.state, reward)
         self.record(history)
-
+        return(reward)
 
     def record(self, history):
         with open(self.log, 'a') as file:
@@ -144,9 +144,9 @@ class QAgent:
         q_opt = self.calcQ(action)
         r = self.get_reward(action)
         factor = self.lr * (q_opt - (r + self.discount * v_opt))
-        self.weights += factor * self.featurize(self.state + [action])
+        self.weights -= factor * self.featurize(self.state + [action])
         return r
 
     def learn(self):
         self.state = []
-        self.explore()
+        return self.explore()

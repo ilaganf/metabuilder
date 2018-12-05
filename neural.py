@@ -110,14 +110,14 @@ def eval_action(actions):
     layers = create_layers(actions)
     model=model_init(layers)
 
-    learning_rate = 0.001
+    learning_rate = 0.01
 
     model.compile(optimizer=tf.train.AdamOptimizer(learning_rate),
                   loss='categorical_crossentropy',
                   metrics=['accuracy'])
     history = model.fit(x=X_train,
               y=to_categorical(y_train, num_classes=10),
-              batch_size=None,
+              batch_size=256,
               epochs=num_epochs,
               verbose=1,
               validation_data=(X_val, to_categorical(y_val, num_classes=10)))
