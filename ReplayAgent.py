@@ -34,9 +34,9 @@ class ReplayAgent(QAgent):
         self.saved_actions, self.final_reward = np.random.choice(self.histories)
 
 
-    def learn(self):
+    def replay_learn(self):
         '''
-        Main differences: reset actions each time function is called, don't log history,
+        Offline learning: reset actions each time function is called, don't log history,
         and return the final reward associated with the saved history
         '''
         state = []
