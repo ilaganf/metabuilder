@@ -28,7 +28,7 @@ class QAgent:
 
 
     def _set_actions(self, file):
-        self.actions = [Action(*act) for act in get_actions(file)]
+        self.actions = [Action(name.lower(), args) for name, args in get_actions(file)]
 
 
     def _successors(self):
