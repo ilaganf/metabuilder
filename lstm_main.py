@@ -3,7 +3,7 @@ main.py
 
 Runs the training of the agent
 '''
-from lstm_ReplayAgent import ReplayAgent
+from LstmReplayAgent import LSTMReplayAgent
 
 import matplotlib.pyplot as plt
 
