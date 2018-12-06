@@ -13,7 +13,7 @@ from copy import deepcopy
 from read_actions import get_actions
 
 
-max_layers = 3
+max_layers = 15
 Action = namedtuple('Action', ['name', 'args'])
 
 class QAgent:
@@ -47,6 +47,12 @@ class QAgent:
         if not prev_layer:
             return action.name == 'c'
 
+        if prev_layer.name == 'o':
+            return action.name == 'lr'
+
+        if action.name == 'lr':
+            return False
+
         # Max 2 pooling layers in a row
         if action.name in ['ap','mp']:
             return len(state) == 1 or state[-2].name not in ['ap','mp']
@@ -63,11 +69,11 @@ class QAgent:
 
 
     def _check_end_state(self, state):
-        return state and state[-1].name == 'o'
+        return state and state[-1].name == 'lr'
 
 
     def get_reward(self, state, action):
-        if not action.name == 'o':
+        if not action.name == 'lr':
             return 0
         return neural.eval_action(state + [action])
 
@@ -184,7 +190,7 @@ class QAgent:
         state = []
         self.numIters = 0
         while True:
-            action = self.get_action()
+            action = self.get_action(state)
             reward = self.update(state, action)
             state.append(action)
             if self._check_end_state(state): break

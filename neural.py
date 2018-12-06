@@ -74,6 +74,8 @@ def model_init(layers):
 def create_layers(actions):
     layers = []
     input_shape = (32, 32, 3)
+    print(actions)
+    lr = 0
     for i, (action, value) in enumerate(actions):
         if i == 0:
             value['input_shape'] = input_shape
@@ -99,7 +101,9 @@ def create_layers(actions):
         if action == 'o':
             value['activation'] = tf.nn.softmax
             layers += [tf.layers.Dense(**value)]
-    return layers
+        if action == 'lr':
+            lr += value['lr']
+    return layers, lr
 
 def optimizer_init_fn():
     return tf.train.AdamOptimizer()
@@ -111,12 +115,12 @@ def eval_action(actions):
     print_every = 700
     num_epochs = 1
 
-    layers = create_layers(actions)
+    layers, lr = create_layers(actions)
     model=model_init(layers)
 
-    learning_rate = 0.01
+    print(lr)
 
-    model.compile(optimizer=tf.train.AdamOptimizer(learning_rate),
+    model.compile(optimizer=tf.train.AdamOptimizer(lr),
                   loss='categorical_crossentropy',
                   metrics=['accuracy'])
     history = model.fit(x=X_train,
@@ -128,11 +132,11 @@ def eval_action(actions):
     return history.history['val_acc'][-1]
 
 if __name__=='__main__':
-    actions =   [('c', {'filters':64, 'kernel_size':5, 'strides':3, 'padding':'SAME'}),
+    actions =  [('c', {'filters':64, 'kernel_size':5, 'strides':3, 'padding':'SAME'}),
                  ('b', {}),
                  ('mp', {'pool_size':3, 'strides':2, 'padding':'SAME'}),
                  ('c', {'filters':32, 'kernel_size':5, 'strides':3, 'padding':'SAME'}),
                  ('mp', {'pool_size':3, 'strides':2, 'padding':'SAME'}),
                  ('f', {}),
-                 ('o', {'units':10})]
+                 ('o', {'units':10})] 
     print(eval_action(actions))

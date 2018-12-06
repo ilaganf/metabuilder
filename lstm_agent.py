@@ -17,7 +17,7 @@ from keras.layers import Embedding
 from keras.layers import LSTM
 
 max_layers = 3
-DIM = 14
+DIM = 16
 Action = namedtuple('Action', ['name', 'args'])
 
 class QAgent:
@@ -60,13 +60,22 @@ class QAgent:
         if not prev_layer:
             return action.name == 'c'
 
+        if prev_layer.name == 'o':
+            return action.name == 'lr'
+
+        if action.name == 'lr':
+            return False
+
+        # Only dense layers after flatten
+        if prev_layer.name in ['f', 'd']:
+            return action.name == 'd' or action.name == 'o'
+
         # Max 2 pooling layers in a row
         if action.name in ['ap','mp']:
             return len(state) == 1 or state[-2].name not in ['ap','mp']
 
-        # Only dense layers after flatten
-        if action.name == 'f' or action.name == 'd' or action.name == 'o':
-            return state[-1].name in ['f','d']
+        if action.name == 'd' or action.name == 'o':
+            return prev_layer.name in ['f', 'd']
 
         # No sequential batchnorm layers
         if action.name == 'b':
@@ -76,26 +85,25 @@ class QAgent:
 
 
     def _check_end_state(self, state):
-        return state and state[-1].name == 'o'
+        return state and state[-1].name == 'lr'
 
 
     def get_reward(self, state, action):
-        if not action.name == 'o':
+        if not action.name == 'lr':
             return 0
         return neural.eval_action(state + [action])
 
 
     def get_action(self, state):
         self.numIters += 1
-        if len(state) == max_layers:
+        if len(state) == max_layers - 1 and all([prev_state.name != 'f' for prev_state in state]):
             return Action(name='f', args={})
-        if len(state) == max_layers + 1:
+        if len(state) == max_layers:
             return Action(name='o', args={'units':10})
             
         if random.random() < self.exploreProb:
             return random.choice(self._successors(state))
         else:
-            #print([x[0] for x in [(self.calcQ(act),act) for act in self._successors()]])
             return max([(self.calcQ(state, act),act) for act in self._successors(state)], key=lambda x:x[0])[1]
 
 
@@ -103,7 +111,7 @@ class QAgent:
         '''
         Override me for different problems
         '''
-        features = np.zeros((len(state) + 1, 14))
+        features = np.zeros((len(state) + 1, 16))
         for i, layer in enumerate(state + [action]):
             if layer.name == 'c':
                 features[i, 0] += 1
@@ -121,8 +129,12 @@ class QAgent:
             if layer.name == 'd':
                 features[i, 10] += 1
                 features[i, 11] += layer.args['units']
-            features[i, 12] += layer.name == 'f'
-            features[i, 13] += layer.name == 'b'
+            if layer.name == 'lr':
+                features[i, 12] += layer.name == 'lr'
+                features[i, 13] += layer.args['lr']
+
+            features[i, 14] += layer.name == 'f'
+            features[i, 15] += layer.name == 'b'
         return features
 
 
@@ -151,7 +163,7 @@ class QAgent:
             state.append(action)
             if self._check_end_state(state): break
         print(self.weights)
-        history = (state, reward)
+        history = (state, reward[0])
         self.record(history)
         return(reward)
 
@@ -172,8 +184,9 @@ class QAgent:
 
         v_opt = self.calcVOpt(state, action)
         #q_opt = self.calcQ(state, action)
-        r = self.get_reward(state, action)
-        y = np.array(self.lr*(r + self.discount * v_opt))
+        r = np.array([self.get_reward(state, action)])
+        y = np.array(r + self.discount * v_opt)
+        print(y, self.calcQ(state, action))
         self.model.fit(self.featurize(state, action)[np.newaxis, :, :], y)
         #self.weights += factor * self.featurize(state, action)
         return r

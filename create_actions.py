@@ -26,6 +26,8 @@ actions['o'] = {}
 actions['o']['units'] = [10]
 
 actions['f'] = []
+actions['lr'] = {}
+actions['lr']['lr'] = [10**x for x in [-1, -2, -3, -4, -5, -6, -7, -8, -9, -10]]
 
 with open('actions.json', 'w') as outfile:
     json.dump(actions, outfile)
