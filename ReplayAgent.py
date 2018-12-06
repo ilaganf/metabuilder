@@ -1,5 +1,6 @@
 # ReplayAgent.py
 from collections import namedtuple
+import random
 
 import numpy as np
 
@@ -26,12 +27,11 @@ class ReplayAgent(QAgent):
             for line in file:
                 self.histories.append(eval(line))
 
-
     def _preset_actions(self):
         '''
         Randomly sample a history to provide the sequence of actions to explore
         '''
-        self.saved_actions, self.final_reward = np.random.choice(self.histories)
+        self.saved_actions, self.final_reward = random.choice(self.histories)
 
 
     def replay_learn(self):
