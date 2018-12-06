@@ -4,11 +4,11 @@ import random
 
 import numpy as np
 
-from lstm_agent import QAgent
+from LstmAgent import LSTMAgent 
 
 Action = namedtuple('Action', ['name','args'])
 
-class ReplayAgent(QAgent):
+class LSTMReplayAgent(LSTMAgent):
 
     def __init__(self, gamma, lr, action_file, exploreProb, log_file):
         self.discount = gamma

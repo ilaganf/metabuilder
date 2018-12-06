@@ -83,16 +83,16 @@ class QAgent:
         Search action using epsilon greedy approach
         '''
         self.numIters += 1
-        if len(state) == max_layers:
+        if len(state) == max_layers - 1 and all([prev_state.name != 'f' for prev_state in state]):
             return Action(name='f', args={})
-        if len(state) == max_layers + 1:
+        if len(state) == max_layers:
             return Action(name='o', args={'units':10})
             
         if random.random() < self.exploreProb:
             return random.choice(self._successors(state))
         else:
-            #print([x[0] for x in [(self.calcQ(act),act) for act in self._successors()]])
-            return max([(self.calcQ(state, act),act) for act in self._successors(state)], key=lambda x:x[0])[1]
+            return max([(self.calcQ(state, act),act) for act \
+                        in self._successors(state)], key=lambda x:x[0])[1]
 
 
     def featurize(self, state, action):
@@ -161,6 +161,7 @@ class QAgent:
         for next_action in successors:
             candidates.append(self.calcQ(next_state, next_action))
         return max(candidates)
+
 
     def record(self, history):
         '''
