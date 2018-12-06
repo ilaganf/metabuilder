@@ -21,3 +21,12 @@ RL formulation:
     - Can also put a hard cap on number of layers allowed (assign huge negative reward if parameter number goes above certain amount)
 
  Transition: deterministic, following from action
+
+ Assumptions/Decisions:
+    - better model will have better performance after 1 epoch than a worse model (for training reward network)
+    - some configurations are not worth exploring (multiple batchnorm, convolution after flattening, etc.)
+    - agent will give promising networks that need to be trained for longer than an epoch
+
+Cool notes:
+    - agent learned that pooling after convolution worked decently
+    - rough number of different possible networks (no pruning): 10 x 68^10
