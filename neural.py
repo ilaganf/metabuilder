@@ -77,9 +77,11 @@ def create_layers(actions):
     for i, (action, value) in enumerate(actions):
         if i == 0:
             value['input_shape'] = input_shape
+            value['activation'] = tf.nn.relu
             layers += [tf.layers.Conv2D(**value)]
         if action == 'c':
             value['kernel_size'] = (value['kernel_size'],value['kernel_size'])
+            value['activation'] = tf.nn.relu
             layers += [tf.layers.Conv2D(**value)]
         if action == 'b':
             layers += [tf.layers.BatchNormalization()]
@@ -92,8 +94,10 @@ def create_layers(actions):
         if action == 'f':
             layers += [tf.layers.Flatten()]
         if action == 'd':
+            value['activation'] = tf.nn.relu
             layers += [tf.layers.Dense(**value)]
         if action == 'o':
+            value['activation'] = tf.nn.softmax
             layers += [tf.layers.Dense(**value)]
     return layers
 
@@ -117,7 +121,7 @@ def eval_action(actions):
                   metrics=['accuracy'])
     history = model.fit(x=X_train,
               y=to_categorical(y_train, num_classes=10),
-              batch_size=256,
+              batch_size=None,
               epochs=num_epochs,
               verbose=1,
               validation_data=(X_val, to_categorical(y_val, num_classes=10)))

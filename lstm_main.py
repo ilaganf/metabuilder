@@ -3,7 +3,7 @@ main.py
 
 Runs the training of the agent
 '''
-from Agent import QAgent
+from lstm_agent import QAgent
 import matplotlib.pyplot as plt
 
 def main():

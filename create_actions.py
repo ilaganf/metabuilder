@@ -8,7 +8,7 @@ actions['c']['strides'] = [1, 2, 3]
 actions['c']['padding'] = ['SAME']
 actions['c']['activation'] = ['relu']
 
-actions['B'] = []
+actions['b'] = []
 actions['mp'] = {}
 actions['mp']['pool_size'] = [2, 5, 7]
 actions['mp']['strides'] = [1, 2, 3]

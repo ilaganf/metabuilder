@@ -5,15 +5,19 @@ Defines the Q-learning agent
 '''
 import random
 from collections import namedtuple, defaultdict
-
 import neural
 import numpy as np
 from create_actions import *
 from copy import deepcopy
 from read_actions import get_actions
 
+from keras.models import Sequential
+from keras.layers import Dense, Dropout
+from keras.layers import Embedding
+from keras.layers import LSTM
 
 max_layers = 3
+DIM = 14
 Action = namedtuple('Action', ['name', 'args'])
 
 class QAgent:
@@ -26,6 +30,7 @@ class QAgent:
         self.exploreProb = exploreProb
         self.weights = np.zeros(29)
         self.log = logFile
+        self.model = self.compile_model()
 
 
     def _set_actions(self, file):
@@ -37,6 +42,14 @@ class QAgent:
             return None
         return [deepcopy(act) for act in self.actions if self._consider_act(state, act)]
 
+    def compile_model(self):
+        model = Sequential()
+        model.add(LSTM(128, input_shape=(None, DIM)))
+        model.add(Dropout(0.5))
+        model.add(Dense(1, activation='sigmoid'))
+        model.compile(loss='mean_squared_error',
+                      optimizer='adam')
+        return model
 
     def _consider_act(self, state, action):
         '''
@@ -90,52 +103,32 @@ class QAgent:
         '''
         Override me for different problems
         '''
-        features = np.zeros(29)
-        for layer in state:
+        features = np.zeros((len(state) + 1, 14))
+        for i, layer in enumerate(state + [action]):
             if layer.name == 'c':
-                features[0] += 1
-                features[1] += layer.args['filters']
-                features[2] += layer.args['kernel_size']
-                features[3] += layer.args['strides']
+                features[i, 0] += 1
+                features[i, 1] += layer.args['filters']
+                features[i, 2] += layer.args['kernel_size']
+                features[i, 3] += layer.args['strides']
             if layer.name == 'mp':
-                features[4] += 1
-                features[5] += layer.args['pool_size']
-                features[6] += layer.args['strides']
+                features[i, 4] += 1
+                features[i, 5] += layer.args['pool_size']
+                features[i, 6] += layer.args['strides']
             if layer.name == 'ap':
-                features[7] += 1
-                features[8] += layer.args['pool_size']
-                features[9] += layer.args['strides']
+                features[i, 7] += 1
+                features[i, 8] += layer.args['pool_size']
+                features[i, 9] += layer.args['strides']
             if layer.name == 'd':
-                features[10] += 1
-                features[11] += layer.args['units']
-            features[12] += layer.name == 'f'
-            features[13] += layer.name == 'b'
-        features[14] = len(state)
-        if action.name == 'c':
-            features[15] += 1
-            features[16] += action.args['filters']
-            features[17] += action.args['kernel_size']
-            features[18] += action.args['strides']
-        if action.name == 'mp':
-            features[19] += 1
-            features[20] += action.args['pool_size']
-            features[21] += action.args['strides']
-        if action.name == 'ap':
-            features[22] += 1
-            features[23] += action.args['pool_size']
-            features[24] += action.args['strides']
-        if action.name == 'd':
-            features[25] += 1
-            features[26] += action.args['units']
-        features[27] += action.name == 'f'
-        features[28] += action.name == 'b'
-        #features /= np.linalg.norm(features)
+                features[i, 10] += 1
+                features[i, 11] += layer.args['units']
+            features[i, 12] += layer.name == 'f'
+            features[i, 13] += layer.name == 'b'
         return features
 
 
     def calcQ(self, state, act):
-        features = self.featurize(state, act)
-        return np.dot(features, self.weights)
+        features = self.featurize(state, act)[np.newaxis, :, :]
+        return self.model.predict(features)
 
     def calcVOpt(self, state, act):
         next_state = state + [act]
@@ -178,10 +171,11 @@ class QAgent:
         #    return reward
 
         v_opt = self.calcVOpt(state, action)
-        q_opt = self.calcQ(state, action)
+        #q_opt = self.calcQ(state, action)
         r = self.get_reward(state, action)
-        factor = self.lr * (r + self.discount * v_opt - q_opt)
-        self.weights += factor * self.featurize(state, action)
+        y = np.array(self.lr*(r + self.discount * v_opt))
+        self.model.fit(self.featurize(state, action)[np.newaxis, :, :], y)
+        #self.weights += factor * self.featurize(state, action)
         return r
 
     def learn(self):
