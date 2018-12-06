@@ -72,14 +72,10 @@ class QAgent:
         return neural.eval_action(state + [action])
 
 
-<<<<<<< HEAD
     def get_action(self, state):
-=======
-    def get_action(self):
         '''
         Search action using epsilon greedy approach
         '''
->>>>>>> 37366ed6a4817d193b916265c24a82bfdd971cb6
         self.numIters += 1
         if len(state) == max_layers:
             return Action(name='f', args={})
@@ -146,6 +142,7 @@ class QAgent:
         features = self.featurize(state, act)
         return np.dot(features, self.weights)
 
+
     def calcVOpt(self, state, act):
         next_state = state + [act]
         candidates = []
@@ -168,7 +165,7 @@ class QAgent:
             file.write('\n')
 
 
-    def update(self, action):
+    def update(self, state, action):
         '''
         Use Bellman to update the weights of the model given an action 
 
@@ -184,13 +181,14 @@ class QAgent:
 
 
     def learn(self):
-        self.state = []
+        state = []
+        self.numIters = 0
         while True:
             action = self.get_action()
-            reward = self.update(action)
-            self.state.append(action)
-            if self._check_end_state(): break
+            reward = self.update(state, action)
+            state.append(action)
+            if self._check_end_state(state): break
         print(self.weights)
-        history = (self.state, reward)
+        history = (state, reward)
         self.record(history)
         return reward
