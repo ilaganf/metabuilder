@@ -18,7 +18,6 @@ class LSTMReplayAgent(LSTMAgent):
         self._set_actions(action_file)
         self.numIters = 0
         self.exploreProb = exploreProb
-        self.weights = np.zeros(29)
         self.model = self.compile_model()
 
     def _load_histories(self):

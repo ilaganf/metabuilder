@@ -3,12 +3,12 @@ main.py
 
 Runs the training of the agent
 '''
-from lstm_ReplayAgent import ReplayAgent
+from LstmReplayAgent import LSTMReplayAgent
 
 import matplotlib.pyplot as plt
 
 def main():
-    agent = ReplayAgent(gamma=0.95, lr=.0001,
+    agent = LSTMReplayAgent(gamma=0.95, lr=.0001,
                         action_file='actions.json', exploreProb=0.1, log_file='history.txt')
     x, y = [], []
     for i in range(100):
