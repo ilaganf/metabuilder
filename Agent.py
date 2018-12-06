@@ -29,7 +29,7 @@ class QAgent:
 
 
     def _set_actions(self, file):
-        self.actions = [Action(*act) for act in get_actions(file)]
+        self.actions = [Action(name.lower(), args) for name, args in get_actions(file)]
 
 
     def _successors(self, state):
@@ -72,7 +72,14 @@ class QAgent:
         return neural.eval_action(state + [action])
 
 
+<<<<<<< HEAD
     def get_action(self, state):
+=======
+    def get_action(self):
+        '''
+        Search action using epsilon greedy approach
+        '''
+>>>>>>> 37366ed6a4817d193b916265c24a82bfdd971cb6
         self.numIters += 1
         if len(state) == max_layers:
             return Action(name='f', args={})
@@ -88,7 +95,9 @@ class QAgent:
 
     def featurize(self, state, action):
         '''
-        Override me for different problems
+        Takes the given state sprime and featurizes it by counting
+        how many of each layer type there are and by counting the number
+        of parameters (may need more sophisticated features)
         '''
         features = np.zeros(29)
         for layer in state:
@@ -150,33 +159,22 @@ class QAgent:
             candidates.append(self.calcQ(next_state, next_action))
         return max(candidates)
 
-    def explore(self):
-        state = []
-        while True:
-            action = self.get_action(state)
-            reward = self.update(state, action)
-            state.append(action)
-            if self._check_end_state(state): break
-        print(self.weights)
-        history = (state, reward)
-        self.record(history)
-        return(reward)
-
     def record(self, history):
+        '''
+        Log a network architecture compiled by the agent
+        '''
         with open(self.log, 'a') as file:
             file.write(str(history))
             file.write('\n')
 
 
-    def update(self, state, action):
-        #if self._check_end_state():
-        #    q_opt = self.calcQ(action)
-        #    reward = self.get_reward()
-        #    factor = self.lr * (q_opt - reward)
-        #    self.weights += factor * self.featurize(self.state)
-        #    print(factor, self.weights, reward)
-        #    return reward
+    def update(self, action):
+        '''
+        Use Bellman to update the weights of the model given an action 
 
+        state is stored as part of the object and transitions are 
+        deterministic, so only need action to calculate
+        '''
         v_opt = self.calcVOpt(state, action)
         q_opt = self.calcQ(state, action)
         r = self.get_reward(state, action)
@@ -184,6 +182,15 @@ class QAgent:
         self.weights += factor * self.featurize(state, action)
         return r
 
+
     def learn(self):
         self.state = []
-        return self.explore()
+        while True:
+            action = self.get_action()
+            reward = self.update(action)
+            self.state.append(action)
+            if self._check_end_state(): break
+        print(self.weights)
+        history = (self.state, reward)
+        self.record(history)
+        return reward
