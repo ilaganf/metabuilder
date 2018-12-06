@@ -16,7 +16,7 @@ from keras.layers import Dense, Dropout
 from keras.layers import Embedding
 from keras.layers import LSTM
 
-max_layers = 3
+max_layers = 5
 DIM = 16
 Action = namedtuple('Action', ['name', 'args'])
 
@@ -44,7 +44,9 @@ class QAgent:
 
     def compile_model(self):
         model = Sequential()
-        model.add(LSTM(128, input_shape=(None, DIM)))
+        model.add(LSTM(128, input_shape=(None, DIM), return_sequences=True))
+        model.add(Dropout(0.5))
+        model.add(LSTM(128))
         model.add(Dropout(0.5))
         model.add(Dense(1, activation='sigmoid'))
         model.compile(loss='mean_squared_error',
@@ -72,7 +74,7 @@ class QAgent:
 
         # Max 2 pooling layers in a row
         if action.name in ['ap','mp']:
-            return len(state) == 1 or state[-2].name not in ['ap','mp']
+            return len(state) == 1 and state[-1].name not in ['ap','mp']
 
         if action.name == 'd' or action.name == 'o':
             return prev_layer.name in ['f', 'd']
@@ -144,7 +146,7 @@ class QAgent:
 
     def calcVOpt(self, state, act):
         next_state = state + [act]
-        candidates = []
+        candidates = [0.1]
         successors = self._successors(next_state)
 
         # Current action is taking us into end state

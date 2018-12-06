@@ -8,15 +8,15 @@ from lstm_ReplayAgent import ReplayAgent
 import matplotlib.pyplot as plt
 
 def main():
-    agent = ReplayAgent(gamma=0.95, lr=.0001,
+    agent = ReplayAgent(gamma=1, lr=.0001,
                         action_file='actions.json', exploreProb=0.1, log_file='history.txt')
     x, y = [], []
     for i in range(100):
+        print(i)
+        agent.replay_learn()
+    for i in range(30):
         x.append(i)
         y.append(agent.learn())
-
-    x.append(101)
-    y.append(agent.learn())
 
     plt.figure()
     plt.plot(x, y)
