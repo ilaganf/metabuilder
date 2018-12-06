@@ -10,7 +10,6 @@ from copy import deepcopy
 import numpy as np
 from keras.models import Sequential
 from keras.layers import Dense, Dropout
-from keras.layers import Embedding
 from keras.layers import LSTM
 
 import neural
@@ -89,13 +88,3 @@ class LSTMAgent(QAgent):
         return r
 
 
-    def learn(self):
-        state = []
-        while True:
-            action = self.get_action(state)
-            reward = self.update(state, action)
-            state.append(action)
-            if self._check_end_state(state): break
-        history = (state, reward[0])
-        self.record(history)
-        return reward
