@@ -42,7 +42,7 @@ class ReplayAgent(QAgent):
         state = []
         self._preset_actions()
         self.numIters = 0
-        for action in self.saved_actions:
+        for action in self.saved_actions[:-1]:
             self.numIters += 1
             self.update(state, action)
             state.append(action)
