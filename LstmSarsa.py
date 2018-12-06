@@ -23,12 +23,10 @@ class LSTMSarsa(LSTMReplayAgent):
         Offline learning: reset actions each time function is called, don't log history,
         and return the final reward associated with the saved history
         '''
-        state = []
         self._preset_actions()
         self.numIters = 0
         for i in range(numiter):
             self.numIters += 1
             s, sp, ap = self.sample_sarsa()
             self.sarsa_update(s, sp[-1], sp, ap)
-            state.append(action)
-        return self.final_reward
+        return 0
