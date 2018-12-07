@@ -13,19 +13,19 @@ from copy import deepcopy
 from read_actions import get_actions
 
 
-max_layers = 15
+max_layers = 10
 Action = namedtuple('Action', ['name', 'args'])
 
 class QAgent:
 
-    def __init__(self, gamma, lr, action_file, exploreProb, logFile):
+    def __init__(self, gamma, lr, action_file, explore_prob, log_file):
         self.discount = gamma
         self.lr = lr
         self._set_actions(action_file)
         self.numIters = 0
-        self.exploreProb = exploreProb
+        self.exploreProb = explore_prob
         self.weights = np.zeros(29)
-        self.log = logFile
+        self.log = log_file
 
 
     def _set_actions(self, file):
@@ -88,7 +88,7 @@ class QAgent:
         if len(state) == max_layers:
             return Action(name='o', args={'units':10})
             
-        if random.random() < self.exploreProb:
+        if random.random() < self.explore_prob/self.numIters:
             return random.choice(self._successors(state))
         else:
             return max([(self.calcQ(state, act),act) for act \
