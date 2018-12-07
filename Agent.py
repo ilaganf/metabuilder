@@ -19,7 +19,8 @@ Action = namedtuple('Action', ['name', 'args'])
 
 class QAgent:
 
-    def __init__(self, gamma, lr, action_file, exploreProb, logFile):
+    def __init__(self, gamma, lr, action_file, explore_prob, log_file,
+                 max_layers):
         self.discount = gamma
         self.lr = lr
         self._set_actions(action_file)
@@ -27,11 +28,13 @@ class QAgent:
         self.exploreProb = exploreProb
         self.weights = np.zeros(DIM)
         self.log = logFile
-
+        self.exploreProb = explore_prob
+        self.weights = np.zeros(DIM)
+        self.log = log_file
+        self.max_layers = max_layers
 
     def _set_actions(self, file):
         self.actions = [Action(name.lower(), args) for name, args in get_actions(file)]
-
 
     def _successors(self, state):
         if self._check_end_state(state):
@@ -84,12 +87,12 @@ class QAgent:
         Search action using epsilon greedy approach
         '''
         self.numIters += 1
-        if len(state) == max_layers - 1 and all([prev_state.name != 'f' for prev_state in state]):
+        if len(state) == self.max_layers - 1 and all([prev_state.name != 'f' for prev_state in state]):
             return Action(name='f', args={})
-        if len(state) == max_layers:
+        if len(state) == self.max_layers:
             return Action(name='o', args={'units':10})
             
-        if random.random() < self.exploreProb:
+        if random.random() < self.explore_prob/self.numIters:
             return random.choice(self._successors(state))
         else:
             return max([(self.calcQ(state, act),act) for act \

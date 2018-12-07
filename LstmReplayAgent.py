@@ -45,5 +45,7 @@ class LSTMReplayAgent(LSTMAgent):
             self.numIters += 1
             self.update(state, action)
             state.append(action)
+        action = self.saved_actions[-1]
+        r = np.array([self.final_reward])
+        self.model.fit(self.featurize(state, action)[np.newaxis, :, :], r)
         return self.final_reward
-    

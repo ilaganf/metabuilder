@@ -3,7 +3,7 @@ Agent.py
 
 Defines the Q-learning agent
 '''
-import random
+import random, csv
 from collections import namedtuple, defaultdict
 from copy import deepcopy
 
@@ -17,21 +17,19 @@ from Agent import QAgent
 from create_actions import *
 from read_actions import get_actions
 
-max_layers = 3
 DIM = 16
 Action = namedtuple('Action', ['name', 'args'])
 
 class LSTMAgent(QAgent):
 
-    def __init__(self, gamma, lr, action_file, exploreProb, logFile):
+    def __init__(self, gamma, lr, action_file, explore_prob, log_file):
         self.discount = gamma
         self.lr = lr
         self._set_actions(action_file)
         self.numIters = 0
-        self.exploreProb = exploreProb
-        self.log = logFile
+        self.explore_prob = explore_prob
+        self.log = log_file
         self.model = self.compile_model()
-
 
     def compile_model(self):
         model = Sequential()
@@ -87,4 +85,13 @@ class LSTMAgent(QAgent):
         self.model.fit(self.featurize(state, action)[np.newaxis, :, :], y)
         return r
 
-
+if __name__=='__main__':
+    agent = LSTMAgent(gamma=0.95, lr=0.0001, action_file='actions.json',
+                      explore_prob=1, log_file='history.txt')
+    x, y = [], []
+    for i in range(100):
+        y.append(agent.learn())
+    with open("lstm_online.csv", 'w') as file:
+        csv_writer = csv.writer(file)
+        for entry in y:
+            csv_writer.writerow(y)
