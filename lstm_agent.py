@@ -32,7 +32,6 @@ class QAgent:
         self.log = logFile
         self.model = self.compile_model()
 
-
     def _set_actions(self, file):
         self.actions = [Action(*act) for act in get_actions(file)]
 
