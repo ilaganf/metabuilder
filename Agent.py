@@ -14,6 +14,7 @@ from read_actions import get_actions
 
 
 max_layers = 15
+DIM = 30
 Action = namedtuple('Action', ['name', 'args'])
 
 class QAgent:
@@ -24,7 +25,7 @@ class QAgent:
         self._set_actions(action_file)
         self.numIters = 0
         self.exploreProb = exploreProb
-        self.weights = np.zeros(29)
+        self.weights = np.zeros(DIM)
         self.log = logFile
 
 
@@ -101,7 +102,7 @@ class QAgent:
         how many of each layer type there are and by counting the number
         of parameters (may need more sophisticated features)
         '''
-        features = np.zeros(29)
+        features = np.zeros(DIM)
         for layer in state:
             if layer.name == 'c':
                 features[0] += 1
@@ -140,7 +141,8 @@ class QAgent:
             features[26] += action.args['units']
         features[27] += action.name == 'f'
         features[28] += action.name == 'b'
-        #features /= np.linalg.norm(features)
+        features[29] = 1.0
+
         return features
 
 
