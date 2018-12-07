@@ -13,12 +13,12 @@ from copy import deepcopy
 from read_actions import get_actions
 
 
-max_layers = 10
 Action = namedtuple('Action', ['name', 'args'])
 
 class QAgent:
 
-    def __init__(self, gamma, lr, action_file, explore_prob, log_file):
+    def __init__(self, gamma, lr, action_file, explore_prob, log_file,
+                 max_layers):
         self.discount = gamma
         self.lr = lr
         self._set_actions(action_file)
@@ -26,11 +26,10 @@ class QAgent:
         self.exploreProb = explore_prob
         self.weights = np.zeros(29)
         self.log = log_file
-
+        self.max_layers = max_layers
 
     def _set_actions(self, file):
         self.actions = [Action(name.lower(), args) for name, args in get_actions(file)]
-
 
     def _successors(self, state):
         if self._check_end_state(state):
@@ -83,9 +82,9 @@ class QAgent:
         Search action using epsilon greedy approach
         '''
         self.numIters += 1
-        if len(state) == max_layers - 1 and all([prev_state.name != 'f' for prev_state in state]):
+        if len(state) == self.max_layers - 1 and all([prev_state.name != 'f' for prev_state in state]):
             return Action(name='f', args={})
-        if len(state) == max_layers:
+        if len(state) == self.max_layers:
             return Action(name='o', args={'units':10})
             
         if random.random() < self.explore_prob/self.numIters:

@@ -17,7 +17,6 @@ from Agent import QAgent
 from create_actions import *
 from read_actions import get_actions
 
-max_layers = 3
 DIM = 16
 Action = namedtuple('Action', ['name', 'args'])
 
@@ -31,7 +30,6 @@ class LSTMAgent(QAgent):
         self.explore_prob = explore_prob
         self.log = log_file
         self.model = self.compile_model()
-
 
     def compile_model(self):
         model = Sequential()
