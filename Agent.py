@@ -194,7 +194,6 @@ class QAgent:
             reward = self.update(state, action)
             state.append(action)
             if self._check_end_state(state): break
-        print(self.weights)
         history = (state, reward)
         self.record(history)
         return reward
