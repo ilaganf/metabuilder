@@ -13,7 +13,6 @@ from copy import deepcopy
 from read_actions import get_actions
 
 
-max_layers = 15
 DIM = 30
 Action = namedtuple('Action', ['name', 'args'])
 
