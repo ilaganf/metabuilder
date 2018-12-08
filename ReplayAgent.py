@@ -10,15 +10,16 @@ Action = namedtuple('Action', ['name','args'])
 
 class ReplayAgent(QAgent):
 
-    def __init__(self, gamma, lr, action_file, exploreProb, log_file):
+    def __init__(self, gamma, lr, action_file, explore_prob, log_file, max_layers):
         self.discount = gamma
         self.lr = lr
         self.log = log_file
         self._load_histories()
         self._set_actions(action_file)
         self.numIters = 0
-        self.exploreProb = exploreProb
-        self.weights = np.zeros(29)
+        self.explore_prob = explore_prob
+        self.weights = np.zeros(30)
+        self.max_layers = max_layers
 
 
     def _load_histories(self):
@@ -42,9 +43,10 @@ class ReplayAgent(QAgent):
         state = []
         self._preset_actions()
         self.numIters = 0
-        for action in self.saved_actions[:-1]:
+        for action in self.saved_actions[:-2]:
             self.numIters += 1
             self.update(state, action)
             state.append(action)
+        self.weights += self.final_reward * self.featurize(state, action)
         return self.final_reward
     

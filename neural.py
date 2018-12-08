@@ -113,7 +113,7 @@ def eval_action(actions):
     X_train, y_train, X_val, y_val, X_test, y_test = load_cifar10()
     device = '/gpu:0'
     print_every = 700
-    num_epochs = 1
+    num_epochs = 10
 
     layers, lr = create_layers(actions)
     model=model_init(layers)
@@ -132,11 +132,22 @@ def eval_action(actions):
     return history.history['val_acc'][-1]
 
 if __name__=='__main__':
-    actions =  [('c', {'filters':64, 'kernel_size':5, 'strides':3, 'padding':'SAME'}),
-                 ('b', {}),
-                 ('mp', {'pool_size':3, 'strides':2, 'padding':'SAME'}),
-                 ('c', {'filters':32, 'kernel_size':5, 'strides':3, 'padding':'SAME'}),
-                 ('mp', {'pool_size':3, 'strides':2, 'padding':'SAME'}),
-                 ('f', {}),
-                 ('o', {'units':10})] 
+    actions = [('c', {"filters": 64, "kernel_size":3, "strides":1}),
+               ("mp", {'pool_size': 3, 'strides': 3, 'padding': 'SAME'}),
+               ('c', {"filters": 64, "kernel_size":1, "strides":1}),
+               ('ap', {"pool_size":7, 'strides':1}),
+               ('f', {}),
+               ('d', {"units":100}),
+               ('o', {"units":10}),
+               ('lr', {"lr":0.001})]
+
+
+
+    #actions =  [('c', {'filters':64, 'kernel_size':5, 'strides':3, 'padding':'SAME'}),
+    #             ('b', {}),
+    #             ('mp', {'pool_size':3, 'strides':2, 'padding':'SAME'}),
+    #             ('c', {'filters':32, 'kernel_size':5, 'strides':3, 'padding':'SAME'}),
+    #             ('mp', {'pool_size':3, 'strides':2, 'padding':'SAME'}),
+    #             ('f', {}),
+    #             ('o', {'units':10})]
     print(eval_action(actions))

@@ -10,15 +10,16 @@ Action = namedtuple('Action', ['name','args'])
 
 class LSTMReplayAgent(LSTMAgent):
 
-    def __init__(self, gamma, lr, action_file, exploreProb, log_file):
+    def __init__(self, gamma, lr, action_file, explore_prob, log_file, max_layers):
         self.discount = gamma
         self.lr = lr
         self.log = log_file
         self._load_histories()
         self._set_actions(action_file)
         self.numIters = 0
-        self.exploreProb = exploreProb
+        self.explore_prob = explore_prob
         self.model = self.compile_model()
+        self.max_layers = max_layers
 
     def _load_histories(self):
         self.histories = []
@@ -43,7 +44,7 @@ class LSTMReplayAgent(LSTMAgent):
         self.numIters = 0
         for action in self.saved_actions[:-1]:
             self.numIters += 1
-            self.update(state, action)
+            self.update(state, action, final_only=True)
             state.append(action)
         action = self.saved_actions[-1]
         r = np.array([self.final_reward])

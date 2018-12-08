@@ -13,7 +13,6 @@ from copy import deepcopy
 from read_actions import get_actions
 
 
-max_layers = 15
 DIM = 30
 Action = namedtuple('Action', ['name', 'args'])
 
@@ -92,7 +91,7 @@ class QAgent:
         if len(state) == self.max_layers:
             return Action(name='o', args={'units':10})
             
-        if random.random() < self.explore_prob/self.numIters:
+        if random.random() < self.explore_prob:
             return random.choice(self._successors(state))
         else:
             return max([(self.calcQ(state, act),act) for act \
@@ -189,7 +188,7 @@ class QAgent:
         r = self.get_reward(state, action)
         factor = self.lr * (r + self.discount * v_opt - q_opt)
         self.weights += factor * self.featurize(state, action)
-        return r
+        return [r]
 
 
     def learn(self):
@@ -197,7 +196,7 @@ class QAgent:
         self.numIters = 0
         while True:
             action = self.get_action(state)
-            reward = self.update(state, action)
+            reward = self.update(state, action)[0]
             state.append(action)
             if self._check_end_state(state): break
         history = (state, reward)

@@ -22,7 +22,7 @@ Action = namedtuple('Action', ['name', 'args'])
 
 class LSTMAgent(QAgent):
 
-    def __init__(self, gamma, lr, action_file, explore_prob, log_file):
+    def __init__(self, gamma, lr, action_file, explore_prob, log_file, max_layers):
         self.discount = gamma
         self.lr = lr
         self._set_actions(action_file)
@@ -30,6 +30,7 @@ class LSTMAgent(QAgent):
         self.explore_prob = explore_prob
         self.log = log_file
         self.model = self.compile_model()
+        self.max_layers = max_layers
 
     def compile_model(self):
         model = Sequential()
@@ -77,20 +78,26 @@ class LSTMAgent(QAgent):
         return self.model.predict(features)
 
 
-    def update(self, state, action):
+    def update(self, state, action, final_only=True):
         v_opt = self.calcVOpt(state, action)
         r = np.array([self.get_reward(state, action)])
         y = np.array(r + self.discount * v_opt)
         print(y, self.calcQ(state, action))
-        self.model.fit(self.featurize(state, action)[np.newaxis, :, :], y)
+        if final_only:
+            if np.sum(r) > 0:
+                self.model.fit(self.featurize(state, action)[np.newaxis, :, :], y)
+        else:
+            self.model.fit(self.featurize(state, action)[np.newaxis, :, :], y)
         return r
 
 if __name__=='__main__':
     agent = LSTMAgent(gamma=0.95, lr=0.0001, action_file='actions.json',
-                      explore_prob=1, log_file='history.txt')
+                      explore_prob=0.1, log_file='history.txt', max_layers=3)
     x, y = [], []
     for i in range(100):
-        y.append(agent.learn())
+        output = agent.learn()[0]
+        print(output)
+        y.append(output)
     with open("lstm_online.csv", 'w') as file:
         csv_writer = csv.writer(file)
         for entry in y:
