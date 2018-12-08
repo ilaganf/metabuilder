@@ -3,6 +3,8 @@ import tensorflow as tf
 import numpy as np
 import math
 import timeit
+import matplotlib as mpl
+mpl.use('TkAgg')
 import matplotlib.pyplot as plt
 from keras.utils.np_utils import to_categorical
 from copy import deepcopy

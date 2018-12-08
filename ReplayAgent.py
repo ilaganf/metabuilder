@@ -6,6 +6,7 @@ import numpy as np
 
 from Agent import QAgent
 
+DIM = 30
 Action = namedtuple('Action', ['name','args'])
 
 class ReplayAgent(QAgent):
@@ -17,8 +18,8 @@ class ReplayAgent(QAgent):
         self._load_histories()
         self._set_actions(action_file)
         self.numIters = 0
-        self.explore_prob = explore_prob
-        self.weights = np.zeros(30)
+        self.explore_prob = exploreProb
+        self.weights = np.zeros(DIM)
         self.max_layers = max_layers
 
 
